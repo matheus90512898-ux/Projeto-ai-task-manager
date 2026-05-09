@@ -4,12 +4,14 @@ import re
 import unicodedata
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+
 def secure_text(text: str) -> str:
     text = unicodedata.normalize("NFKC", text)
     text = text.strip()
     text = re.sub(r"[\x00-\x1f]", "", text)
     text = text.replace("<", "").replace(">", "")
     return text
+
 
 class UserCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
@@ -34,9 +36,11 @@ class UserCreate(BaseModel):
             raise ValueError("Senha muito previsível. Use caracteres mais variados.")
         return v
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=1, max_length=128)
+
 
 class UserResponse(BaseModel):
     id: int
@@ -46,9 +50,11 @@ class UserResponse(BaseModel):
     created_at: datetime
     model_config = {"from_attributes": True}
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 class TokenData(BaseModel):
     email: Optional[str] = None
