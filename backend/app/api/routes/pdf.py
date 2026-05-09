@@ -8,7 +8,7 @@ from app.core.database import get_db
 from app.models.user import User
 from app.schemas.pdf_document import PDFAskRequest, PDFAskResponse, PDFListResponse, PDFSummarizeResponse, PDFUploadResponse
 from app.services.pdf_service import PDFService
-from app.main import limiter  # importa limiter global
+from app.core.limiter import limiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/pdf", tags=["PDF"])
