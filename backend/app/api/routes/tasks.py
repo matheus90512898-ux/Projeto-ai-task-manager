@@ -8,7 +8,7 @@ from app.models.user import User
 from app.schemas.task import TaskCreate, TaskPrioritizeRequest, TaskResponse, TaskUpdate
 from app.services.ai_service import AIService
 from app.services.task_service import TaskService
-from app.main import limiter  # importa limiter global
+from app.core.limiter import limiter  
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/tasks", tags=["Tarefas"])
