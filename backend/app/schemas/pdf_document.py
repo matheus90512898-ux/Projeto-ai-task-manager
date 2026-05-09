@@ -1,15 +1,13 @@
 from datetime import datetime
 from typing import Optional
 import re
-import unicodedata
 from pydantic import BaseModel, Field, field_validator
 
 
-def secure_text(text: str) -> str:
-    text = unicodedata.normalize("NFKC", text)
+def sanitize_text(text: str) -> str:
     text = text.strip()
+    text = re.sub(r"[<>]", "", text)
     text = re.sub(r"[\x00-\x1f]", "", text)
-    text = text.replace("<", "").replace(">", "")  # sanitiza, não bloqueia
     return text
 
 
@@ -33,7 +31,7 @@ class PDFAskRequest(BaseModel):
 
     @field_validator("question")
     def clean_question(cls, v):
-        return secure_text(v)
+        return sanitize_text(v)
 
 
 class PDFAskResponse(BaseModel):
