@@ -1,24 +1,19 @@
-import os
 import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
 from app.api.routes import auth, tasks, pdf
 from app.core.database import Base, engine
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
+from app.core.limiter import limiter
 
 logger = logging.getLogger(__name__)
 
 Base.metadata.create_all(bind=engine)
+
 security = HTTPBearer()
-
-# LIMITER GLOBAL — único em toda a aplicação
-def get_real_ip(request: Request) -> str:
-    return request.client.host  # zero trust em headers
-
-limiter = Limiter(key_func=get_real_ip)
 
 app = FastAPI(
     title="AI Task Manager",
@@ -58,12 +53,9 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
     response.headers["Content-Security-Policy"] = "default-src 'self'"
     response.headers["Cache-Control"] = "no-store"
-    if "X-Powered-By" in response.headers:
-        del response.headers["X-Powered-By"]
-    if "X-Real-IP" in response.headers:
-        del response.headers["X-Real-IP"]
-    if "X-Forwarded-For" in response.headers:
-        del response.headers["X-Forwarded-For"]
+    for header in ["X-Powered-By", "X-Real-IP", "X-Forwarded-For"]:
+        if header in response.headers:
+            del response.headers[header]
     return response
 
 app.include_router(auth.router)
